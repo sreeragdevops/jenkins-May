@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Code Checkout from Repository') {
+            steps {
+                git(
+                    branch: 'main',
+                    credentialsId: 'jenkins',
+                    url: 'https://github.com/sreeragdevops/jenkins-May.git'
+                )
+            }
+        }
+
+        stage('Terraform Init') {
+            steps {
+                sh 'terraform init'
+            }
+        }
+    }
+}
