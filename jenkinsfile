@@ -1,10 +1,10 @@
 pipeline {
     agent any
 
-    environment {
-        withCredentials([aws(accessKeyVariable: 'AWS_ACCESS_KEY_ID', credentialsId: 'aws-credentials', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-
+ environment {
+        AWS_ACCESS_KEY_ID = credentials('aws-credentials')
     }
+
 
     stages {
         stage('Code Checkout from Repository') {
