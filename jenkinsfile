@@ -1,16 +1,9 @@
 pipeline {
     agent any
 
-parameters {
-        choice(name: 'TERRAFORM_ACTION', choices: ['apply', 'destroy', 'plan'], description: 'Select Terraform action to perform')
-        string(name: 'USER_NAME', defaultValue: 'Sreerag', description: 'Specify who is running the code')
+    parameters {
+        string(name: 'DOCKER_IMAGE_NAME', defaultValue: 'firstimage', description: 'Name of the Docker image')
     }
-
-
- environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-credentials')
-    }
-
 
     stages {
         stage('Code Checkout from Repository') {
@@ -18,26 +11,28 @@ parameters {
                 git(
                     branch: 'main',
                     credentialsId: 'jenkins',
-                    url: 'https://github.com/sreeragdevops/jenkins-May.git'
+                    url: 'https://github.com/sreeragdevops/jenkins-terraform.git'
                 )
             }
         }
 
-        stage('Terraform Init') {
+        stage('Build Docker Image') {
             steps {
-                sh 'terraform init'
+                script {
+                    sh "docker build -t ${params.DOCKER_IMAGE_NAME}:latest . -f Dockerfile"
+                }
             }
         }
 
-        stage('Terraform Plan') {
+        stage('Push to Docker Hub') {
             steps {
-                sh 'terraform plan'
-            }
-        }
-
-        stage('Terraform destroy') {
-            steps {
-                sh 'terraform destroy -auto-approve'
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhubcredential', passwordVariable: 'pwd', usernameVariable: 'user')]) {
+                        sh "echo '${pwd}' | docker login -u ${user} --password-stdin"
+                        sh "docker tag ${params.DOCKER_IMAGE_NAME}:latest ${user}/${params.DOCKER_IMAGE_NAME}:latest"
+                        sh "docker push ${user}/${params.DOCKER_IMAGE_NAME}:latest"
+                    }
+                }
             }
         }
     }
