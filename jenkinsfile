@@ -4,6 +4,9 @@ pipeline {
     parameters {
         string(name: 'DOCKER_IMAGE_NAME', defaultValue: 'firstimage', description: 'Name of the Docker image')
     }
+environment {
+        AWS_ACCESS_KEY_ID = credentials('aws_credential')
+    }
 
     stages {
         stage('Code Checkout from Repository') {
