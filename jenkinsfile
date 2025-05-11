@@ -35,5 +35,17 @@ pipeline {
                 }
             }
         }
+    stage('EKS Connection Test') {
+            steps {
+                script {
+                    // Ensure the withKubeConfig step is correctly set
+                    withKubeConfig(caCertificate: '', clusterName: '', contextName: '', credentialsId: 'kubernetes-cloud', namespace: '', restrictKubeConfigAccess: false, serverUrl: '') {
+                        sh 'kubectl get nodes'
+                        sh 'kubectl apply -f deployment.yaml'
+            
+                    }
+                }
+            }
+        }
     }
 }
